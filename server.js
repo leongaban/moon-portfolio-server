@@ -1,6 +1,7 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
 import cors from 'cors'
+import knex from 'knex'
 
 import { saltMaker } from './utils/saltMaker.js'
 
@@ -11,34 +12,25 @@ app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 app.use(cors())
 
-const database = {
-  users: [
-    {
-      id: '123',
-      name: 'Jenny',
-      email: 'jenny@gmail.com',
-      entries: 0,
-      joined: new Date(),
-    },
-    {
-      id: '124',
-      name: 'Sally',
-      email: 'sally@gmail.com',
-      password: 'bananas',
-      entries: 0,
-      joined: new Date(),
-    },
-  ],
-  login: [
-    {
-      id: '987',
-      hash: '',
-      email: 'jenny@gmail.com',
-      password: 'apples',
-    },
-  ],
-}
+const db = knex({
+  client: 'pg',
+  connection: {
+    host: '127.0.0.1',
+    port: 5432,
+    user: 'leongaban',
+    password: '',
+    database: 'moon-portfolio',
+  },
+})
 
+db.select('*')
+  .from('users')
+  .then(data => {
+    console.log(data)
+  })
+
+// ? ROOT //////////
+// -----------------
 app.get('/', (req, res) => {
   console.log({
     message: 'Moon Portfolio Server - RUNNING',
@@ -46,7 +38,6 @@ app.get('/', (req, res) => {
   })
   res.json({
     message: 'Moon Portfolio Server - RUNNING',
-    users: database.users,
   })
   // res.json(database)
 })
@@ -96,68 +87,57 @@ app.post('/register', async (req, res) => {
   // Store hash in your password DB.
   const hash = await bcrypt.hash(password, saltRounds).then(hashed => hashed)
 
-  database.users.push({
-    id: '125',
-    email,
-    password,
-    hash,
+  db.insert({
     name,
-    entries: 0,
-    portfolio: [],
+    email,
     joined: new Date(),
   })
-
-  const newUser = database.users[database.users.length - 1]
-
-  console.log('Registered new user:')
-  console.log(newUser)
-  console.log(database)
-
-  res.status(200).send({
-    status: 200,
-    message: 'Register successful',
-  })
-
-  // res.status(200).json(newUser)
+    .into('users')
+    .returning('*')
+    .then(user => {
+      console.log('User inserted successfully', user[0])
+      res.status(200).send({
+        status: 200,
+        message: 'Sign up successful',
+      })
+    })
+    .catch(error => {
+      console.error('Error inserting user:', error)
+      res.status(400).send({
+        status: 400,
+        message: 'Unable to sign up.',
+      })
+    })
 })
 
 // ? PROFILE //////////
 // -------------------
-app.get('/profile/:id', (req, res) => {
+app.get('/profile/:id', async (req, res) => {
   const { id } = req.params
-  const user = database.users.find(user => user.id === id)
-  const not_found = 'not found'
-  let found = false
 
-  if (user) {
-    found = true
-    res.json(user)
-  }
+  try {
+    const user = await db.select('*').from('users').where({
+      id,
+    })
 
-  if (!found) {
-    res.status(400).json(not_found)
-  }
+    if (user.length === 0) {
+      throw new Error('User not found')
+    }
 
-  const log = found ? user : not_found
-  console.log('Fetching user:', log)
-})
+    console.error('Found user:', user[0])
 
-app.put('/image', (req, res) => {
-  const { id } = req.body
-  const user = database.users.find(user => user.id === id)
-  const not_found = 'not found'
-  let found = false
+    res.status(200).send({
+      status: 200,
+      user: user[0],
+      message: 'User found.',
+    })
+  } catch (error) {
+    console.error('Error fetching user:', error)
 
-  if (user) {
-    found = true
-    user.entries++
-    return res.json(
-      `User ${user.name} image entries updated to: ${user.entries}`
-    )
-  }
-
-  if (!found) {
-    res.status(400).json(not_found)
+    res.status(400).send({
+      status: 400,
+      message: 'Error getting user.',
+    })
   }
 })
 
