@@ -61,6 +61,7 @@ app.post('/signin', async (req, res) => {
   console.log('password', password)
   try {
     // Load hash from your password DB.
+    // ? currently just testing to user1
     const result = await bcrypt.compare(
       password,
       '$2b$05$/KtRBUW6RkuCWRTBRFR9WeYyarQbz3wu7Ku5kODyhyAUUCH6pRWr.'
@@ -90,28 +91,36 @@ app.post('/signin', async (req, res) => {
 
 // ? REGISTER //////////
 // --------------------
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
   const { email, password, name } = req.body
   const saltRounds = saltMaker()
 
-  bcrypt.hash(password, saltRounds).then(function (hash) {
-    // Store hash in your password DB.
-    console.log(hash)
-  })
+  // Store hash in your password DB.
+  const hash = await bcrypt.hash(password, saltRounds).then(hashed => hashed)
 
   database.users.push({
     id: '125',
     email,
     password,
+    hash,
     name,
     entries: 0,
+    portfolio: [],
     joined: new Date(),
   })
 
   const newUser = database.users[database.users.length - 1]
+
   console.log('Registered new user:')
   console.log(newUser)
-  res.status(200).json(newUser)
+  console.log(database)
+
+  res.status(200).send({
+    status: 200,
+    message: 'Register successful',
+  })
+
+  // res.status(200).json(newUser)
 })
 
 // ? PROFILE //////////
