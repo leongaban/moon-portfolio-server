@@ -17,7 +17,6 @@ const database = {
       id: '123',
       name: 'Jenny',
       email: 'jenny@gmail.com',
-      password: 'apples',
       entries: 0,
       joined: new Date(),
     },
@@ -35,6 +34,7 @@ const database = {
       id: '987',
       hash: '',
       email: 'jenny@gmail.com',
+      password: 'apples',
     },
   ],
 }
@@ -54,11 +54,8 @@ app.get('/', (req, res) => {
 // ? SIGIN //////////
 // -----------------
 app.post('/signin', async (req, res) => {
-  console.log('signin: req.body', req.body)
   const { email, password } = req.body
-  console.log('SERVER')
-  console.log('email', email)
-  console.log('password', password)
+
   try {
     // Load hash from your password DB.
     // ? currently just testing to user1
@@ -73,6 +70,7 @@ app.post('/signin', async (req, res) => {
       // Authentication successful
       res.status(200).send({
         status: 200,
+        user: database.users[0],
         message: 'Signin successful',
       })
     } else {
