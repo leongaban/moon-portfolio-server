@@ -81,33 +81,47 @@ app.post('/signin', async (req, res) => {
 // ? REGISTER //////////
 // --------------------
 app.post('/register', async (req, res) => {
-  const { email, password, name } = req.body
+  const { name, email, password } = req.body
   const saltRounds = saltMaker()
 
   // Store hash in your password DB.
-  const hash = await bcrypt.hash(password, saltRounds).then(hashed => hashed)
+  const hash = await bcrypt.hash(password, saltRounds)
 
-  db.insert({
-    name,
-    email,
-    joined: new Date(),
+  db.transaction(trx => {
+    trx
+      .insert({
+        hash,
+        email,
+      })
+      .into('login')
+      .returning('email')
+      .then(user => {
+        return trx
+          .insert({
+            name,
+            email: user[0].email,
+            joined: new Date(),
+          })
+          .into('users')
+          .returning('*')
+          .then(user => {
+            console.log('User sign up successful', user[0])
+            res.status(200).send({
+              status: 200,
+              message: 'Sign up successful',
+            })
+          })
+          .then(trx.commit)
+          .catch(trx.rollback)
+      })
+      .catch(error => {
+        console.error('Error inserting user:', error)
+        res.status(400).send({
+          status: 400,
+          message: 'Unable to sign up.',
+        })
+      })
   })
-    .into('users')
-    .returning('*')
-    .then(user => {
-      console.log('User inserted successfully', user[0])
-      res.status(200).send({
-        status: 200,
-        message: 'Sign up successful',
-      })
-    })
-    .catch(error => {
-      console.error('Error inserting user:', error)
-      res.status(400).send({
-        status: 400,
-        message: 'Unable to sign up.',
-      })
-    })
 })
 
 // ? PROFILE //////////
