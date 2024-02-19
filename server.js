@@ -23,11 +23,11 @@ const db = knex({
   },
 })
 
-db.select('*')
-  .from('users')
-  .then(data => {
-    console.log(data)
-  })
+// db.select('*')
+//   .from('users')
+//   .then(data => {
+//     console.log(data)
+//   })
 
 // ? ROOT //////////
 // -----------------
@@ -48,33 +48,39 @@ app.post('/signin', async (req, res) => {
   const { email, password } = req.body
 
   try {
-    // Load hash from your password DB.
-    // ? currently just testing to user1
-    const result = await bcrypt.compare(
-      password,
-      '$2b$05$/KtRBUW6RkuCWRTBRFR9WeYyarQbz3wu7Ku5kODyhyAUUCH6pRWr.'
-    )
+    const data = await db
+      .select('email', 'hash')
+      .from('login')
+      .where('email', '=', email)
 
-    console.log('bcrypt compare result:', result)
+    if (data.length === 0) {
+      return res.status(400).json('Invalid email or password')
+    }
 
-    if (result === true) {
-      // Authentication successful
-      res.status(200).send({
-        status: 200,
-        user: database.users[0],
-        message: 'Signin successful',
-      })
+    const hashMatch = await bcrypt.compare(password, data[0].hash)
+
+    if (hashMatch) {
+      return db
+        .select('*')
+        .from('users')
+        .where('email', '=', email)
+        .then(user => {
+          console.log('Succesful login for', user[0].email)
+          res.status(200).send({
+            status: 200,
+            user: user[0],
+            message: 'Sign in successful',
+          })
+        })
+        .catch(err => {
+          throw new Error('Unable to get user', err)
+        })
     } else {
-      // Authentication failed
-      res.status(401).send({
-        status: 401,
-        message: 'Invalid credentials',
-      })
+      res.status(400).send('Wrong credentials')
     }
   } catch (error) {
-    // Handle any errors
-    console.error(error)
-    res.status(500).send('Internal server error')
+    console.log('Something bad happened:', error)
+    res.status(400).send('Wrong credentials')
   }
 })
 
