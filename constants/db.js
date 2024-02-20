@@ -9,6 +9,7 @@ let port
 let user
 let password
 let database
+let ssl // Add SSL/TLS configuration option
 
 if (currentENV === 'localhost') {
   console.log('WE ARE IN LOCALHOST')
@@ -35,6 +36,9 @@ if (currentENV === 'localhost') {
   user = PROD_USER
   database = PROD_DB_NAME
   password = PROD_DB_PASS
+
+  // Specify SSL/TLS options for production environment
+  ssl = { rejectUnauthorized: false }
 }
 
 const db = knex({
@@ -45,6 +49,7 @@ const db = knex({
     user,
     password,
     database,
+    ssl, // Include SSL/TLS options here
   },
 })
 
