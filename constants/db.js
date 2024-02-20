@@ -4,53 +4,55 @@ dotenvConfig()
 
 const currentENV = process.env.ENVIRONMENT
 
-let host
-let port
-let user
-let password
-let database
-let ssl // Add SSL/TLS configuration option
+let dbPayload = {
+  host: '',
+  port: '',
+  user: '',
+  password: '',
+  database: '',
+  ssl: { rejectUnauthorized: false }, // Specify SSL/TLS options for production environment
+}
 
 if (currentENV === 'localhost') {
-  console.log('WE ARE IN LOCALHOST')
+  console.log('>> SERVER on LOCALHOST 🥑 <<<')
   const {
-    LOCAL_HOST,
-    LOCAL_DB_PORT,
-    LOCAL_USER,
-    LOCAL_DB_NAME,
-    LOCAL_DB_PASS,
+    LOCAL_HOST: host,
+    LOCAL_DB_PORT: port,
+    LOCAL_USER: user,
+    LOCAL_DB_NAME: database,
+    LOCAL_DB_PASS: password,
   } = process.env
 
-  host = LOCAL_HOST
-  port = LOCAL_DB_PORT
-  user = LOCAL_USER
-  database = LOCAL_DB_NAME
-  password = LOCAL_DB_PASS
+  dbPayload = { ...dbPayload, host, port, user, password, database }
 } else if (currentENV === 'production') {
-  console.log('WE ARE IN PRODUCTION')
-  const { PROD_DB_NAME, PROD_DB_PASS, PROD_PORT, PROD_USER, INTERNAL_DB_URL } =
-    process.env
+  console.log('>>> SERVER on PRODUCTION 🌮 <<<')
+  /* prettier-ignore */
+  const {
+    PROD_DB_NAME: database,
+    PROD_DB_PASS: password,
+    PROD_PORT: port,
+    PROD_USER: user,
+    INTERNAL_DB_URL: host
+  } = process.env
 
-  host = INTERNAL_DB_URL
-  port = PROD_PORT
-  user = PROD_USER
-  database = PROD_DB_NAME
-  password = PROD_DB_PASS
-
-  // Specify SSL/TLS options for production environment
-  ssl = { rejectUnauthorized: false }
+  dbPayload = { ...dbPayload, host, port, user, password, database }
 }
 
 const db = knex({
   client: 'pg',
-  connection: {
-    host,
-    port,
-    user,
-    password,
-    database,
-    ssl, // Include SSL/TLS options here
-  },
+  connection: { ...dbPayload },
 })
+
+// const db = knex({
+//   client: 'pg',
+//   connection: {
+//     host,
+//     port,
+//     user,
+//     password,
+//     database,
+//     ssl, // Include SSL/TLS options here
+//   },
+// })
 
 export { currentENV, db }

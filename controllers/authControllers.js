@@ -8,8 +8,6 @@ import { db } from '../constants/db.js'
 const registerUser = asyncMiddleware(async (req, res, next) => {
   const { name, email, password } = req.body
   const saltRounds = saltMaker()
-
-  // Store hash in your password DB.
   const hash = await bcrypt.hash(password, saltRounds)
 
   db.transaction(trx => {
@@ -72,7 +70,7 @@ const signinUser = asyncMiddleware(async (req, res, next) => {
         .from('users')
         .where('email', '=', email)
         .then(user => {
-          console.log('Succesful login for', user[0].email)
+          // console.log('Succesful login for', user[0].email)
           res.status(200).send({
             status: 200,
             user: user[0],
