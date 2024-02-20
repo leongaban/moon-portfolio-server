@@ -3,7 +3,7 @@ import { config as dotenvConfig } from 'dotenv'
 dotenvConfig()
 
 const currentENV = process.env.ENVIRONMENT
-console.log('currentENV', currentENV)
+
 let host
 let port
 let user

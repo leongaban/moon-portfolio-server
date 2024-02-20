@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import { config as dotenvConfig } from 'dotenv'
 import { authRoutes } from './routes/authRoutes.js'
+import db from './constants/db.js'
 
 dotenvConfig()
 const app = express()
