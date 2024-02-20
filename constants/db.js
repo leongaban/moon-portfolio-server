@@ -19,6 +19,7 @@ if (currentENV === 'localhost') {
     LOCAL_DB_NAME,
     LOCAL_DB_PASS,
   } = process.env
+
   host = LOCAL_HOST
   port = LOCAL_DB_PORT
   user = LOCAL_USER
@@ -28,6 +29,7 @@ if (currentENV === 'localhost') {
   console.log('WE ARE IN PRODUCTION')
   const { PROD_DB_NAME, PROD_DB_PASS, PROD_PORT, PROD_USER, INTERNAL_DB_URL } =
     process.env
+
   host = INTERNAL_DB_URL
   port = PROD_PORT
   user = PROD_USER
@@ -46,4 +48,4 @@ const db = knex({
   },
 })
 
-export default db
+export { currentENV, db }

@@ -2,26 +2,25 @@ import express from 'express'
 import cors from 'cors'
 import { config as dotenvConfig } from 'dotenv'
 import { authRoutes } from './routes/authRoutes.js'
-import db from './constants/db.js'
+import { currentENV, db } from './constants/db.js'
 
 dotenvConfig()
 const app = express()
 const port = process.env.PORT
-const currentENV = process.env.ENVIRONMENT
 
 let corsOptions
 
 if (currentENV === 'localhost') {
   corsOptions = {
     origin: 'http://localhost:3000',
-    optionsSuccessStatus: 200,
   }
 } else {
   corsOptions = {
     origin: 'https://moonportfolio.com',
-    optionsSuccessStatus: 200,
   }
 }
+
+console.log('corsOptions', corsOptions)
 
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
@@ -46,12 +45,15 @@ app.get('/', (req, res) => {
 // ? Test route
 // -----------------------------
 app.get('/test', (req, res) => {
+  console.log('TEST route hit!')
+
   db.select('*')
     .from('users')
     .then(data => {
       console.log(data)
       res.json({
-        message: data,
+        data: data,
+        message: 'TEST route',
       })
     })
 })
