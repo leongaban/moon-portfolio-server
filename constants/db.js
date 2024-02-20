@@ -43,16 +43,4 @@ const db = knex({
   connection: { ...dbPayload },
 })
 
-// const db = knex({
-//   client: 'pg',
-//   connection: {
-//     host,
-//     port,
-//     user,
-//     password,
-//     database,
-//     ssl, // Include SSL/TLS options here
-//   },
-// })
-
 export { currentENV, db }

@@ -1,8 +1,12 @@
 import express from 'express'
+import path from 'path'
 import cors from 'cors'
+import { fileURLToPath } from 'url'
 import { config as dotenvConfig } from 'dotenv'
 import { authRoutes } from './routes/authRoutes.js'
 import { currentENV, db } from './constants/db.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 dotenvConfig()
 const app = express()
@@ -47,10 +51,11 @@ app.get('/test', (req, res) => {
     .from('users')
     .then(data => {
       console.log(data)
-      res.json({
-        data: data,
-        message: 'TEST route',
-      })
+      res.sendFile(path.join(__dirname, '/index.html'))
+      // res.json({
+      //   data: data,
+      //   message: 'TEST route',
+      // })
     })
 })
 

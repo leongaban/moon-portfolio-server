@@ -70,7 +70,7 @@ const signinUser = asyncMiddleware(async (req, res, next) => {
         .from('users')
         .where('email', '=', email)
         .then(user => {
-          // console.log('Succesful login for', user[0].email)
+          console.log('Succesful login for', user[0].email)
           res.status(200).send({
             status: 200,
             user: user[0],
