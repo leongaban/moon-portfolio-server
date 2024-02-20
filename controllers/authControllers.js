@@ -6,7 +6,6 @@ import { db } from '../constants/db.js'
 // ? REGISTER USER
 // -------------------------------------------------------------
 const registerUser = asyncMiddleware(async (req, res, next) => {
-  console.log('REGISTER ROUTE hit')
   const { name, email, password } = req.body
   const saltRounds = saltMaker()
 
@@ -53,7 +52,6 @@ const registerUser = asyncMiddleware(async (req, res, next) => {
 // ? SIGIN USER
 // -----------------------------------------------------------
 const signinUser = asyncMiddleware(async (req, res, next) => {
-  console.log('SIGNIN ROUTE hit')
   const { email, password } = req.body
 
   try {

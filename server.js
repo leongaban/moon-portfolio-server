@@ -20,8 +20,6 @@ if (currentENV === 'localhost') {
   }
 }
 
-console.log('corsOptions', corsOptions)
-
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 app.use(cors(corsOptions))
@@ -45,8 +43,6 @@ app.get('/', (req, res) => {
 // ? Test route
 // -----------------------------
 app.get('/test', (req, res) => {
-  console.log('TEST route hit!')
-
   db.select('*')
     .from('users')
     .then(data => {
