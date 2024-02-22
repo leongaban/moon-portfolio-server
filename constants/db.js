@@ -10,7 +10,6 @@ let dbPayload = {
   user: '',
   password: '',
   database: '',
-  ssl: { rejectUnauthorized: false }, // Specify SSL/TLS options for production environment
 }
 
 if (currentENV === 'localhost') {
@@ -35,7 +34,15 @@ if (currentENV === 'localhost') {
     INTERNAL_DB_URL: host
   } = process.env
 
-  dbPayload = { ...dbPayload, host, port, user, password, database }
+  dbPayload = {
+    ...dbPayload,
+    host,
+    port,
+    user,
+    password,
+    database,
+    ssl: { rejectUnauthorized: false }, // Specify SSL/TLS options for production environment
+  }
 }
 
 const db = knex({
